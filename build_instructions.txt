@@ -1,0 +1,10 @@
+# build_instructions.txt
+To build the project, simply run:
+
+mingw32-make
+
+# or, if you have make installed as 'make':
+make
+
+# The executable file will be generated as:
+./main.exe
