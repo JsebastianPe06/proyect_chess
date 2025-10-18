@@ -1,0 +1,17 @@
+# cpp_dependencies.txt
+Compiler: g++ (Rev6, Built by MSYS2 project) 13.1.0
+Standard: C++17
+Build system: manual
+Operating System: Windows 10 / 11
+
+Include directories:
+- include/
+
+Source directories:
+- src/
+
+External libraries:
+- None (only standard C++ libraries are used)
+
+Required flags:
+- -Wall -std=c++17 -Iinclude
