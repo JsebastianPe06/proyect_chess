@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Ejecutar proyecto",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/PROYECTO ESTRUCTURAS",
+      "cwd": "${workspaceFolder}",
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb"
+    }
+  ]
+}
