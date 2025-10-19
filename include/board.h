@@ -3,8 +3,8 @@ This .h indicates the existence of the Board class and its attributes and
 methods for using them
 */
 
-#ifndef GAME_H
-#define GAME_H
+#ifndef BOARD_H
+#define BOARD_H
 
 #include <iostream>
 #include <string>
