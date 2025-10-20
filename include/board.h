@@ -43,7 +43,7 @@ class Board{
     bool attack_minor_diagonal(const std::pair<int,int> square, Piece* attacked);
     bool is_sliding_attack(const std::pair<int,int> square, Piece* attacked);
     
-    void move_piece(Piece* p, int new_pos[2]);
+    void move_piece(Piece* p, std::pair<int, int>);
 };
 
 #endif

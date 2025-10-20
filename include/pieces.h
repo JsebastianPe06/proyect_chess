@@ -20,12 +20,15 @@ class Piece{
     bool color; //white = true, black = false
     int f;
     int c;
+    int value;
+    std::vector<std::pair<int, int>> pos_moves;
+
   public:
     bool is_moves_rook;
     bool is_moves_bishop;
   
   public:
-    //Methods set an get of rows(f), columns(c), color and name
+    //Methods set an get of rows(f), columns(c), color, value and name
     int get_row();
     int get_column();
     void set_row(int new_f);
@@ -34,11 +37,14 @@ class Piece{
     void set_actual_pos(int new_pos[2]); //method to set actual row(f) and actual column(c)
     bool get_color();
     std::string get_name();
+    int get_value();
+    std::vector<std::pair<int, int>> get_moves();
+    void set_moves(std::vector<std::pair<int, int>> m);
 
 
-    Piece(bool color, int f, int c);
+    Piece(bool color, int f, int c, int value);
     virtual ~Piece();
-    virtual std::vector<std::pair<int, int>> possible_moves(Board& b) = 0;
+    virtual void possible_moves(Board& b) = 0;
 
     //methods to display in terminal polymorphically
     virtual void display(std::ostream& os) const;
@@ -46,6 +52,9 @@ class Piece{
 
     //method to know whether the piece is pinned
     bool is_pinned(Board& b, Piece* p);
+
+    //specific method of the pawn and knight
+    virtual bool is_attacking(Piece* p) = 0;
 };
 
 class Pawn: public Piece{
@@ -53,10 +62,11 @@ class Pawn: public Piece{
     Pawn(bool color, int f, int c);
   
   public:
-    std::vector<std::pair<int, int>> possible_moves(Board& b) override;
+    void possible_moves(Board& b) override;
     bool get_first_move();
-    bool is_attacking(Piece* p);
     bool is_first_move;
+  
+    bool is_attacking(Piece* p) override;
 };
 
 class Rook: public Piece{
@@ -67,7 +77,9 @@ class Rook: public Piece{
     Rook(bool color, int f, int c);
   
   public:
-    std::vector<std::pair<int, int>> possible_moves(Board& b) override;
+    void possible_moves(Board& b) override;
+
+    bool is_attacking(Piece* p) override;
 };
 
 class Knight: public Piece{
@@ -78,10 +90,11 @@ class Knight: public Piece{
     Knight(bool color, int f, int c);
   
   public:
-    std::vector<std::pair<int, int>> possible_moves(Board& b) override;
+    void possible_moves(Board& b) override;
     void display(std::ostream& os) const override;
     friend std::ostream& operator<<(std::ostream& os, Knight& p);
-    bool is_attacking(Piece* p);
+    
+    bool is_attacking(Piece* p) override;
 };
 
 class Bishop: public Piece{
@@ -92,7 +105,8 @@ class Bishop: public Piece{
     Bishop(bool color, int f, int c);
   
   public:
-    std::vector<std::pair<int, int>> possible_moves(Board& b) override;
+    void possible_moves(Board& b) override;
+    bool is_attacking(Piece* p) override;
 };
 
 class Queen: public Piece{
@@ -102,7 +116,9 @@ class Queen: public Piece{
     Queen(bool color, int f, int c);
   
   public:
-    std::vector<std::pair<int, int>> possible_moves(Board& b) override;
+    void possible_moves(Board& b) override;
+
+    bool is_attacking(Piece* p) override;
 };
 
 class King: public Piece{
@@ -113,7 +129,9 @@ class King: public Piece{
     King(bool color, int f, int c);
   
   public:
-    std::vector<std::pair<int, int>> possible_moves(Board& b) override;
+    void possible_moves(Board& b) override;
+
+    bool is_attacking(Piece* p) override;
 
 };
 

@@ -20,7 +20,13 @@ Board::Board(){
   };
 };
 
-Board::~Board(){};
+Board::~Board(){
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            delete board[i][j];
+        }
+    }
+}
 
 std::ostream& operator<<(std::ostream& os, const Board& p){
   for (int i = 7; i >= 0; i--){
@@ -86,22 +92,7 @@ void Board::starting_position(){
   Board::starting_queen();
 };
 //---------------------------------------------------------------------------
-//----------------------------- MOVE METHODS --------------------------------
-
-void Board::move_piece(Piece* p, int new_pos[2]){
-  /*This method move a piece to a new position exchange pointers and delete
-  captured pieces*/
-  if(board[new_pos[0]][new_pos[1]] != nullptr){
-    delete board[new_pos[0]][new_pos[1]];
-    board[new_pos[0]][new_pos[1]] = nullptr;
-  }
-  int a = p->get_row();
-  int b = p->get_column();
-  p->set_row(new_pos[0]);
-  p->set_column(new_pos[1]);
-  board[new_pos[0]][new_pos[1]] = board[a][b];
-  board[a][b] = nullptr;
-};
+//----------------------------- Analyze METHODS --------------------------------
 
 bool Board::attack_row(const std::pair<int,int> square, Piece* attacked){
   /*This method determines whether a piece is being attacked by a rook or queen
@@ -128,7 +119,7 @@ bool Board::attack_row(const std::pair<int,int> square, Piece* attacked){
     Piece* p = board[f][i];
     if (p != nullptr) {
       if (p->get_color() != attacked->get_color()) {
-        if (p->is_moves_rook || p->is_moves_bishop) // can move like a rook (rook/queen)
+        if (p->is_moves_rook) // can move like a rook (rook/queen)
           is_attacked = p->is_moves_rook; // ensure only rook/queen logic applies
       }
       break;

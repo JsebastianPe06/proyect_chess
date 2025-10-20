@@ -13,10 +13,11 @@ movements and save states for determinate valid movements
 
 
 //----------Piece-------------
-Piece::Piece(bool color, int f, int c){
+Piece::Piece(bool color, int f, int c, int value){
   this -> color = color;
   this -> f = f;
   this -> c = c;
+  this -> value = value;
 };
 
 Piece::~Piece(){};
@@ -50,6 +51,17 @@ bool Piece::get_color(){
 std::string Piece::get_name(){
   return name;
 };
+int Piece::get_value(){
+  return value;
+};
+
+std::vector<std::pair<int, int>> Piece::get_moves(){
+  return pos_moves;
+}
+
+void Piece::set_moves(std::vector<std::pair<int, int>> m){
+  pos_moves = m;
+}
 
 void Piece::display(std::ostream& os) const{
     os << name[0] << (color? 'w':'b');
@@ -71,14 +83,14 @@ bool Piece::is_pinned(Board& b, Piece* p){
 
 
 // ------------------------------ piece pawn ---------------------------------
-Pawn::Pawn(bool color, int f, int c): Piece(color, f, c){
+Pawn::Pawn(bool color, int f, int c): Piece(color, f, c, 1){
   name = "Pawn";
   is_moves_bishop = 0;
   is_moves_rook = 0;
   is_first_move = 1;
 };
 
-std::vector<std::pair<int, int>> Pawn::possible_moves(Board& b){
+  void Pawn::possible_moves(Board& b){
   /*Method that return the pawn's movement including possibles passant
   without included pawn promotion*/
   int dir = color? -1:1;
@@ -98,7 +110,7 @@ std::vector<std::pair<int, int>> Pawn::possible_moves(Board& b){
   if(c!=0){
     if(board[f+dir][c-1]!=nullptr) moves.push_back({f+dir, c-1});
   }
-  return moves;
+  pos_moves = moves;
 };
 
 bool Pawn::is_attacking(Piece* p){
@@ -112,14 +124,14 @@ bool Pawn::is_attacking(Piece* p){
 
 
 //------------------------- piece rook ------------------------------------
-Rook::Rook(bool color, int f, int c): Piece(color, f, c){
+Rook::Rook(bool color, int f, int c): Piece(color, f, c, 5){
   name = "Rook";
   is_moves_bishop = 0;
   is_moves_rook = 1;
 };
 const std::pair<int, int> Rook::dir[4] = {{1,0}, {0,-1}, {-1,0}, {0,1}};
 
-std::vector<std::pair<int, int>> Rook::possible_moves(Board& b){
+void Rook::possible_moves(Board& b){
   /*Method that returns all possible rook moves (castling is a king move)*/
   std::vector<std::pair<int, int>> moves;
   auto& board = b.get_board();
@@ -139,12 +151,16 @@ std::vector<std::pair<int, int>> Rook::possible_moves(Board& b){
       aux_c += dir_c; 
     }
   }
-  return moves;
+  pos_moves = moves;
+};
+
+bool Rook::is_attacking(Piece* p){
+  return 0;
 };
 
 
 //------------------------- piece kinght -----------------------------------
-Knight::Knight(bool color, int f, int c): Piece(color, f, c){
+Knight::Knight(bool color, int f, int c): Piece(color, f, c, 3){
   name = "Knight";
   is_moves_bishop = 0;
   is_moves_rook = 0;
@@ -152,7 +168,7 @@ Knight::Knight(bool color, int f, int c): Piece(color, f, c){
 const std::pair<int, int> Knight::dir[8] = {{1,2}, {-1,2}, {2,1}, {2,-1}, {1,-2}, {-1,-2},
 {-2,-1}, {-2,1}};
 
-std::vector<std::pair<int, int>> Knight::possible_moves(Board& b){
+void Knight::possible_moves(Board& b){
   /*Method that returns all possible knight moves*/
   std::vector<std::pair<int, int>> moves;
   auto& board = b.get_board();
@@ -164,7 +180,7 @@ std::vector<std::pair<int, int>> Knight::possible_moves(Board& b){
       else if(board[aux_f][aux_c]->get_color()!=color) moves.push_back({aux_f,aux_c});
     }
   }
-  return moves;
+  pos_moves = moves;
 };
 
 void Knight::display(std::ostream& os) const {
@@ -182,18 +198,18 @@ bool Knight::is_attacking(Piece* p){
 
 
 //---------------------------- piece bishop --------------------------------
-Bishop::Bishop(bool color, int f, int c): Piece(color, f, c){
+Bishop::Bishop(bool color, int f, int c): Piece(color, f, c, 3){
   name = "Bishop";
   is_moves_bishop = 1;
   is_moves_rook = 0;
 };
 const std::pair<int, int> Bishop::dir[4] = {{1,1}, {1,-1}, {-1,-1}, {-1,1}};
 
-std::vector<std::pair<int, int>> Bishop::possible_moves(Board& b){
+void Bishop::possible_moves(Board& b){
   /*Method that returns all possible bishop moves*/
   std::vector<std::pair<int, int>> moves;
   auto& board = b.get_board();
-  for(int i=0; i<8; i++){
+  for(int i=0; i<4; i++){
     int dir_f = dir[i].first;
     int dir_c = dir[i].second;
     int aux_f = f+dir_f;
@@ -209,12 +225,16 @@ std::vector<std::pair<int, int>> Bishop::possible_moves(Board& b){
       aux_c += dir_c;
     }
   }
-  return moves;
+  pos_moves = moves;
 }
+
+bool Bishop::is_attacking(Piece* p){
+  return 0;
+};
 
 
 //------------------------------ piece queen -------------------------------
-Queen::Queen(bool color, int f, int c): Piece(color, f, c){
+Queen::Queen(bool color, int f, int c): Piece(color, f, c, 10){
   name = "Queen";
   is_moves_bishop = 1;
   is_moves_rook = 1;
@@ -222,11 +242,11 @@ Queen::Queen(bool color, int f, int c): Piece(color, f, c){
 const std::pair<int, int> Queen::dir[8] = {{1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0},
 {-1,1}, {0,1}};
 
-std::vector<std::pair<int, int>> Queen::possible_moves(Board& b){
+void Queen::possible_moves(Board& b){
   /*Method that returns all possible queen moves*/
   std::vector<std::pair<int, int>> moves;
   auto& board = b.get_board();
-  for(int i=0; i<4; i++){
+  for(int i=0; i<8; i++){
     int dir_f = dir[i].first;
     int dir_c = dir[i].second;
     int aux_f = f+dir_f;
@@ -242,12 +262,16 @@ std::vector<std::pair<int, int>> Queen::possible_moves(Board& b){
       aux_c += dir_c;
     }
   }
-  return moves;
+  pos_moves = moves;
 }
+
+bool Queen::is_attacking(Piece* p){
+  return 0;
+};
 
 
 //----------------------------- piece king ---------------------------------
-King::King(bool color, int f, int c): Piece(color, f, c){
+King::King(bool color, int f, int c): Piece(color, f, c, 1000){
   name = "King";
   is_moves_bishop = 0;
   is_moves_rook = 0;
@@ -255,7 +279,7 @@ King::King(bool color, int f, int c): Piece(color, f, c){
 const std::pair<int, int> King::dir[8] = {{1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0},
 {-1,1}, {0,1}};
 
-std::vector<std::pair<int, int>> King::possible_moves(Board& b){
+void King::possible_moves(Board& b){
   /*Method that returns all possible King moves*/
   std::vector<std::pair<int, int>> moves;
   auto& board = b.get_board();
@@ -267,5 +291,9 @@ std::vector<std::pair<int, int>> King::possible_moves(Board& b){
       else if(board[aux_f][aux_c]->get_color()!=color) moves.push_back({aux_f,aux_c});
     }
   }
-  return moves;
+  pos_moves = moves;
+};
+
+bool King::is_attacking(Piece* p){
+  return 0;
 };
