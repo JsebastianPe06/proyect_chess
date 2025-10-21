@@ -1,8 +1,3 @@
-/*
-This .h indicates the existence of the Piece classes and its attributes and
-methods for using them
-*/
-
 #ifndef PIECES_H
 #define PIECES_H
 

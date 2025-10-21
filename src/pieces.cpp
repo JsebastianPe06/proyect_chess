@@ -1,8 +1,3 @@
-/*
-This .cpp contains the Piece classes, with methods for calculate possible
-movements and save states for determinate valid movements
-*/
-
 #include <iostream>
 #include <string>
 #include <array>
@@ -11,6 +6,10 @@ movements and save states for determinate valid movements
 #include "pieces.h"
 #include "board.h"
 
+/*
+This .cpp contains the Piece classes, with methods for calculate possible
+movements and save states for determinate valid movements
+*/
 
 //----------Piece-------------
 Piece::Piece(bool color, int f, int c, int value){

@@ -1,7 +1,3 @@
-/*
-This .h indicates the existence of the Game class and its attributes and
-methods for using them
-*/
 #ifndef GAME_H
 #define GAME_H
 
@@ -22,16 +18,16 @@ class Player;
 class Game{
   public:
     Board b_game;
+    bool turn; //white = true, black = false
 
   protected:
     Player* white_player;
     Player* black_player;
-    bool turn; //white = true, black = false
     int counter_irrelevant_moves; //counter to know whether there is draw by 50 plays
     std::stack<std::array<std::pair<int, int>,2>> movements; //save the moves made in the game
   
   public:
-    Game();
+    Game(Player* p1, Player* p2);
     ~Game();
 
     std::vector<std::pair<int, int>> val_sq(std::pair<int, int> a_pos, std::pair<int, int> n_pos);

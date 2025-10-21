@@ -9,10 +9,16 @@
 #include "player.h"
 #include "board.h"
 
-Game::Game(){
+Game::Game(Player* p1, Player* p2){
+  white_player = p1;
+  black_player = p2;
   turn = true;
   counter_irrelevant_moves = 0;
   b_game.starting_position();
+};
+
+Game::~Game(){
+  
 };
 
 std::vector<std::pair<int,int>> Game::val_square_check(Piece* p, std::pair<int,int> sq){
@@ -109,41 +115,6 @@ std::pair<int, int> n_pos){
   return moves;
 };
 
-void Game::move_piece(Piece* p, std::pair<int, int> new_p){
-  /*This method move a piece to a new position exchange pointers and delete
-  captured pieces*/
-  int nf =  new_p.first;
-  int nc = new_p.second;
-  auto& board = b_game.get_board();
-  Piece* pi = board[nf][nc];
-  //There a piece for capture?
-  if(pi!=nullptr){
-    Player* enemy = pi->get_color()? white_player:black_player;
-    auto& enemy_pieces = enemy->get_pieces();
-    for (size_t i=1; i<enemy_pieces.size(); ++i){ //initialyze in 0 because that position is the king
-      if (enemy_pieces[i]==pi){
-        enemy_pieces[i] = enemy_pieces.back(); //deleted of time O(1)
-        enemy_pieces.pop_back();
-        break;
-      }
-    }
-    delete pi;
-    board[nf][nc] = nullptr;
-    counter_irrelevant_moves = 0;
-  }
-  else if(p->get_name()=="Pawn"){
-    counter_irrelevant_moves = 0;
-    p->get_color()? white_player->paw_promotion(p):black_player->paw_promotion(p); 
-  }
-  else counter_irrelevant_moves += 1;
-  int a = p->get_row();
-  int b = p->get_column();
-  p->set_row(nf);
-  p->set_column(nc);
-  board[nf][nc] = board[a][b];
-  board[a][b] = nullptr;
-};
-
 bool Game::analyze_check(std::pair<int, int> a_pos, std::pair<int, int> p_pos){
   /*returns if there is check*/
   Piece* k = turn? black_player->get_pieces()[0]:white_player->get_pieces()[0];
@@ -193,6 +164,42 @@ void Game::move_piece(Piece* p, std::pair<int, int> new_p){
   board[a][b] = nullptr;
 }
 
+void Game::valid_move_piece(Piece* p, std::vector<std::pair<int, int>> aux_m){
+  auto& b = b_game.get_board();
+  std::vector<std::pair<int, int>> moves;
+  if(p->is_moves_bishop==1 || p->is_moves_rook){
+    for(size_t i=1; i<aux_m.size(); i++){
+      int f = aux_m[i].first;
+      int c = aux_m[i].second;
+      if(b[f][c]!= nullptr){
+        if(b_game.is_sliding_attack(p->get_actual_pos(), b[f][c])) moves.push_back(aux_m[i]);
+      }
+      else{
+        Piece* aux_p = new Pawn(p->get_color()? 1:0, f, c);
+        b[f][c] = aux_p;
+        if(b_game.is_sliding_attack(p->get_actual_pos(),b[f][c])) moves.push_back(aux_m[i]);
+        delete aux_p;
+        b[f][c] = nullptr;
+      }
+    }
+  }
+  else{
+    for(size_t i=1; i<aux_m.size(); i++){
+      int f = aux_m[i].first;
+      int c = aux_m[i].second;
+      if(b[f][c]!= nullptr){
+        if(p->is_attacking(b[f][c])) moves.push_back(aux_m[i]);
+      }
+      else{
+        Piece* aux_p = new Pawn(p->get_color()? 1:0, f, c);
+        if(p->is_attacking(aux_p)) moves.push_back(aux_m[i]);
+        delete aux_p;
+      }
+    }
+  }
+  p->set_moves(moves); 
+};
+
 char Game::start_game(){
   /*Given all the functions to be able to play, this method uses all methods to
   compile until there is a winner or a draw*/
@@ -206,7 +213,7 @@ char Game::start_game(){
     bool is_checkmate = true; //If there is check, the move check controls this variable
     bool is_draw = true;
     //Play a move: returns a pair of positions (actual_pos, new_pos)
-    movements.push(current->play_turn());
+    //
     std::pair<int, int> a_p = movements.top()[0];
     std::pair<int, int> n_p = movements.top()[1];
     //Check that the move is valid and the origin piece belongs to the player

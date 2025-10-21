@@ -1,8 +1,3 @@
-/*
-This .h indicates the existence of the Board class and its attributes and
-methods for using them
-*/
-
 #ifndef BOARD_H
 #define BOARD_H
 

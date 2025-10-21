@@ -1,8 +1,3 @@
-/*
-This .cpp contain the board class and its methods for create a board in the
-initial position, validate and save the movements, and keep states of the game 
-*/
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -10,6 +5,10 @@ initial position, validate and save the movements, and keep states of the game
 #include "board.h"
 #include "pieces.h"
 
+/*
+This .cpp contain the board class and its methods for create a board in the
+initial position, validate and save the movements, and keep states of the game 
+*/
 
 //--------------- Board -------------------
 Board::Board(){

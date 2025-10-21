@@ -1,10 +1,14 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_main.h>
 #include <iostream>
-#include "include/pieces.h"
-#include "include/board.h"
+#include "game.h"
+#include "interface.h"
+#include "board.h"
+#include "player.h"
 
-int main(){
-  std::ios::sync_with_stdio(false);
-  std::setvbuf(stdout, nullptr, _IONBF, 0);
-
-  return 0;
+int main() {
+  Interface p;
+  p.principal_menu();
 };
+
+

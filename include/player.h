@@ -1,7 +1,3 @@
-/*
-This .h indicates the existence of the player class and bot class and its
-attributes and methods for using them
-*/
 #ifndef PLAYER_H
 #define PLAYER_H
 
@@ -30,7 +26,7 @@ class Player{
     std::vector<Piece*>& get_pieces();
     void start_pieces(Board& b);
 
-    virtual std::array<std::pair<int, int>, 2> play_turn() = 0;
+    virtual std::array<std::pair<int, int>, 2> play_turn(const Board& board, const std::vector<Piece*>& pieces) = 0;
     virtual void paw_promotion(Piece* p) = 0;
 };
 
@@ -38,7 +34,7 @@ class RealUser: public Player{
   public:
     RealUser(std::string name, bool is_white);
 
-    std::array<std::pair<int, int>, 2> play_turn() override;
+    std::array<std::pair<int, int>, 2> play_turn(const Board& board, const std::vector<Piece*>& pieces) override;
     virtual void paw_promotion(Piece* p) override;
 
 };
@@ -47,7 +43,7 @@ class RandomBot: public Player{
   public:
     RandomBot(bool is_white);
 
-    std::array<std::pair<int, int>, 2> play_turn() override;
+    std::array<std::pair<int, int>, 2> play_turn(const Board& board, const std::vector<Piece*>& pieces) override;
     virtual void paw_promotion(Piece* p) override;
 };
 
