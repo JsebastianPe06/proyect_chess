@@ -26,7 +26,7 @@ void Interface::defined_game(){
     if(option==1){
       Player* p1 = new RealUser("player1", 1);
       Player* p2 = new RealUser("player2", 0); 
-      Game gm(p1, p2);
+      Game gm(p1, p2, &history);
       gm.start_game();
     }
     else if(option==2){
@@ -36,7 +36,7 @@ void Interface::defined_game(){
       if(start){
         Player* p1 = new RandomBot(1);
         Player* p2 = new RealUser("player", 0); 
-        Game gm(p1, p2);
+        Game gm(p1, p2, &history);
         gm.start_game();
         delete p1;
         delete p2;
@@ -44,7 +44,7 @@ void Interface::defined_game(){
       else{
         Player* p1 = new RandomBot(0);
         Player* p2 = new RealUser("player", 1); 
-        Game gm(p1, p2);
+        Game gm(p1, p2, &history);
         gm.start_game();
         delete p1;
         delete p2;
@@ -72,7 +72,24 @@ void Interface::principal_menu(){
     }
 
     else if(option==2){
-
+      if(!history.has_games()){
+        std::cout << "No games in history.\n";
+      }
+      else{
+        int n;
+        std::cout << "How many last games to display? ";
+        std::cin >> n;
+        auto last_games = history.get_last_n_games(n);
+        int game_number = 1;
+        for(auto &game_moves : last_games){
+          std::cout << "Game " << game_number++ << " moves:\n";
+          for(auto &move : game_moves){
+            std::cout << "(" << move[0].first << "," << move[0].second << ") -> "
+              << "(" << move[1].first << "," << move[1].second << ")\n";
+          }
+          std::cout << "---------------------\n";
+        }
+      }
     }
     else{
       exit = true;

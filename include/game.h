@@ -10,6 +10,7 @@
 #include "board.h"
 #include "pieces.h"
 #include "player.h"
+#include "game_history.h"
 
 class Board;
 class Piece;
@@ -25,9 +26,10 @@ class Game{
     Player* black_player;
     int counter_irrelevant_moves; //counter to know whether there is draw by 50 plays
     std::list<std::array<std::pair<int, int>,2>> movements; //save the moves made in the game
+    GameHistory* history;
   
   public:
-    Game(Player* p1, Player* p2);
+    Game(Player* p1, Player* p2, GameHistory* history);
     ~Game();
 
     std::vector<std::pair<int, int>> val_sq(std::pair<int, int> a_pos, std::pair<int, int> n_pos);

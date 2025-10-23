@@ -9,6 +9,7 @@
 #include <random>
 
 #include "pieces.h"
+#include "game_history.h"
 
 class Piece;
 
@@ -17,6 +18,7 @@ class Player{
     std::string name;
     bool is_white;
     std::vector<Piece*> pieces; //save the pieces in order where king is first
+    GameHistory hitory;
   
   public:
     Player(std::string name, bool is_white);

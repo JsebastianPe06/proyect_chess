@@ -8,13 +8,15 @@
 #include "game.h"
 #include "player.h"
 #include "board.h"
+#include "game_history.h"
 
-Game::Game(Player* p1, Player* p2){
+Game::Game(Player* p1, Player* p2, GameHistory* h){
   white_player = p1;
   black_player = p2;
   turn = true;
   counter_irrelevant_moves = 0;
   b_game.starting_position();
+  h = history;
 };
 
 Game::~Game(){
@@ -242,6 +244,7 @@ char Game::start_game(){
       if(is_checkmate){
         std::string bo = current->get_color()? "White":"Black";
         std::cout << bo << " Pieces win" << std::endl;
+        if(history) history->save_game(std::list<std::array<std::pair<int,int>,2>>(movements.begin(), movements.end()));
         return current->get_color()? 'W':'B';
       }
     }
@@ -259,6 +262,7 @@ char Game::start_game(){
       }
       if(is_draw || (counter_irrelevant_moves==50)){
         std::cout << "The game finish in draw" << std::endl;
+        if(history) history->save_game(std::list<std::array<std::pair<int,int>,2>>(movements.begin(), movements.end()));
         return 'D';
       }
     }

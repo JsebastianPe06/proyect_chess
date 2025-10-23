@@ -7,7 +7,13 @@
 #include <vector>
 #include <list>
 
+#include "game_history.h"
+
 class Interface{
+  private:
+    GameHistory history;
+
+
   public:
     void defined_game();
     void principal_menu();
