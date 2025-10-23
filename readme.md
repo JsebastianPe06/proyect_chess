@@ -28,18 +28,31 @@ Antes de compilar y ejecutar el programa, asegúrate de tener instalado:
 ## Structura del proyecto
 
  proyecto-ajedrez
+
  ┣  main.cpp
+
  ┣ src/
+
  ┃ ┣ board.cpp
+
  ┃ ┣ game.cpp
+
  ┃ ┣ player.cpp
+
  ┃ ┣ pieces.cpp
+
  ┃ ┗ gui.cpp
+
  ┣  include/
+
  ┃ ┣ board.h
+
  ┃ ┣ game.h
+
  ┃ ┣ player.h
+
  ┃ ┗ pieces.h
+ 
  ┗  README.md
 
 ## Compilación
