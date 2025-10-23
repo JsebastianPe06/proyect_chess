@@ -24,7 +24,7 @@ class Game{
     Player* white_player;
     Player* black_player;
     int counter_irrelevant_moves; //counter to know whether there is draw by 50 plays
-    std::stack<std::array<std::pair<int, int>,2>> movements; //save the moves made in the game
+    std::list<std::array<std::pair<int, int>,2>> movements; //save the moves made in the game
   
   public:
     Game(Player* p1, Player* p2);
@@ -38,6 +38,7 @@ class Game{
     char start_game();
     void move_piece(Piece* p, std::pair<int, int> new_p);
     void valid_move_piece(Piece* p, std::vector<std::pair<int, int>> val_m);
+    void filter_move_king(Piece* k);
 };
 
 #endif

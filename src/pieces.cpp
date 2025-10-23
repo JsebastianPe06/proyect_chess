@@ -92,7 +92,7 @@ Pawn::Pawn(bool color, int f, int c): Piece(color, f, c, 1){
   void Pawn::possible_moves(Board& b){
   /*Method that return the pawn's movement including possibles passant
   without included pawn promotion*/
-  int dir = color? -1:1;
+  int dir = color? 1:-1;
   std::vector<std::pair<int, int>> moves;
   auto& board = b.get_board();
   //advance one square
@@ -104,10 +104,14 @@ Pawn::Pawn(bool color, int f, int c): Piece(color, f, c, 1){
   }
   //capture
   if(c!=7){
-    if(board[f+dir][c+1]!=nullptr) moves.push_back({f+dir, c+1});
+    if(board[f+dir][c+1]!=nullptr){
+      if(board[f+dir][c+1]->get_color()!=color)moves.push_back({f+dir, c+1});
+    }
   }
   if(c!=0){
-    if(board[f+dir][c-1]!=nullptr) moves.push_back({f+dir, c-1});
+    if(board[f+dir][c-1]!=nullptr){
+      if(board[f+dir][c-1]->get_color()!=color)moves.push_back({f+dir, c-1});
+    }
   }
   pos_moves = moves;
 };
@@ -117,8 +121,10 @@ bool Pawn::is_attacking(Piece* p){
   with allied pieces to know if a piece or the pawn is defending the piece.*/
   std::pair<int, int> pos_p = p->get_actual_pos();
   pos_p.first -= (color? 1:-1);
-  int m = pos_p.second - c;
-  return (m==1 || m==-1);
+  int dc = pos_p.second - c;
+  int df = pos_p.first - f;
+  if(color) return (df==-1 && (dc==-1 || dc==1));
+  else return (df==1 && (dc==-1 || dc==1));
 };
 
 
@@ -187,7 +193,7 @@ void Knight::display(std::ostream& os) const {
 }
 
 bool Knight::is_attacking(Piece* p){
-  /*Given a piece, it returns if the pawn is attacking the piece, it also works
+  /*Given a piece, it returns if the knight is attacking the piece, it also works
   with allied pieces to know if a piece or the pawn is defending the piece.*/
   std::pair<int,int> pos_p = p->get_actual_pos();
   int df = std::abs(pos_p.first-f);
@@ -293,6 +299,11 @@ void King::possible_moves(Board& b){
   pos_moves = moves;
 };
 
-bool King::is_attacking(Piece* p){
-  return 0;
-};
+bool King::is_attacking(Piece* p) {
+  /*Given a piece, it returns true if the king is attacking the piece.
+  It also works with allied pieces to determine if the king is defending it.*/
+  std::pair<int, int> pos_p = p->get_actual_pos();
+  int df = std::abs(pos_p.first-f);
+  int dc = std::abs(pos_p.second-c);
+  return (df<= 1&& dc<=1&& !(df==0 && dc==0));
+}

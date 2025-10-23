@@ -98,7 +98,6 @@ std::pair<int, int> n_pos){
   std::vector<std::pair<int,int>> moves;
   bool val_sliding = b[n_f][n_c]->is_moves_bishop || b[n_f][n_c]->is_moves_rook;
   bool val_exposed = b_game.is_sliding_attack(a_pos, k);
-  if(val_sliding && val_exposed) return {};
   if(b[n_f][n_c]!=nullptr){
     //whether is sliding piece
     if(val_sliding){
@@ -107,6 +106,10 @@ std::pair<int, int> n_pos){
     //whether is pawn or knight
     else if(b[n_f][n_c]->get_name()!="King"){
       moves = {n_pos};
+    }
+    else{
+      bool val = b_game.is_sliding_attack(n_pos, k);
+      if(val && val_exposed) return {};
     }
     if(val_exposed) moves = val_square_check(k, a_pos);
     //whether the moved piece generate a exposed check
@@ -144,30 +147,29 @@ void Game::move_piece(Piece* p, std::pair<int, int> new_p){
         break;
       }
     }
-    delete pi;
     board[nf][nc] = nullptr;
     counter_irrelevant_moves = 0;
   }
-  else if(p->get_name() == "Pawn"){
-    counter_irrelevant_moves = 0;
-    if(p->get_row() == 6 && nf == 7 && p->get_color() == 0)
-      black_player->paw_promotion(p);
-    else if(p->get_row() == 1 && nf == 0 && p->get_color() == 1)
-      white_player->paw_promotion(p);
-  }
-  else counter_irrelevant_moves += 1;
   int a = p->get_row();
   int b = p->get_column();
   p->set_row(nf);
   p->set_column(nc);
   board[nf][nc] = board[a][b];
   board[a][b] = nullptr;
+  if(p->get_name() == "Pawn"){
+    counter_irrelevant_moves = 0;
+    if(p->get_row() == 6 && nf == 7 && p->get_color() == 0)
+      black_player->paw_promotion(p, b_game);
+    else if(p->get_row() == 1 && nf == 0 && p->get_color() == 1)
+      white_player->paw_promotion(p, b_game);
+  }
+  else counter_irrelevant_moves += 1;
 }
 
 void Game::valid_move_piece(Piece* p, std::vector<std::pair<int, int>> aux_m){
   auto& b = b_game.get_board();
   std::vector<std::pair<int, int>> moves;
-  if(p->is_moves_bishop==1 || p->is_moves_rook){
+  if(p->is_moves_bishop || p->is_moves_rook){
     for(size_t i=1; i<aux_m.size(); i++){
       int f = aux_m[i].first;
       int c = aux_m[i].second;
@@ -203,6 +205,8 @@ void Game::valid_move_piece(Piece* p, std::vector<std::pair<int, int>> aux_m){
 char Game::start_game(){
   /*Given all the functions to be able to play, this method uses all methods to
   compile until there is a winner or a draw*/
+  white_player->start_pieces(b_game);
+  black_player->start_pieces(b_game);
   std::vector<Piece*>& p = white_player->get_pieces();
   for(int i=0; i<16; i++){
     p[i]->possible_moves(b_game);
@@ -213,19 +217,16 @@ char Game::start_game(){
     bool is_checkmate = true; //If there is check, the move check controls this variable
     bool is_draw = true;
     //Play a move: returns a pair of positions (actual_pos, new_pos)
-    //
-    std::pair<int, int> a_p = movements.top()[0];
-    std::pair<int, int> n_p = movements.top()[1];
-    //Check that the move is valid and the origin piece belongs to the player
-    if(a_p.first<0 || a_p.first>7 || a_p.second<0 || a_p.second>7) return 'D';
-    if(n_p.first<0 || n_p.first>7 || n_p.second<0 || n_p.second>7) return 'D';
-    Piece* moving_piece = b_game.get_board()[a_p.first][a_p.second];
-    if(moving_piece==nullptr || moving_piece->get_color()!=current->get_color()) return 'D';
-    //Analyze if the move produces a check to the opponent king
+    std::array<std::pair<int, int>, 2> aux = current->play_turn(b_game);
+    move_piece(b_game.get_board()[aux[0].first][aux[0].second],aux[1]);
+    movements.push_back(aux);
+    std::pair<int, int> a_p = aux[0];
+    std::pair<int, int> n_p = aux[1];
     bool val_check = analyze_check(a_p, n_p);
     std::vector<Piece*>& o = opponent->get_pieces();
     Piece* king = o[0];
     king->possible_moves(b_game);
+    if(!(o[0]->get_moves().empty())) is_checkmate = false;
     //If there is check after the move
     if(val_check){
       std::vector<std::pair<int, int>> aux_m = val_sq(a_p, n_p);
@@ -234,12 +235,15 @@ char Game::start_game(){
           valid_move_piece(o[i], aux_m);
         }
         else{
-          std::vector<std::pair<int,int>> val_pin = val_square_pin(o[i]);
-          valid_move_piece(o[i], val_pin);
+          valid_move_piece(o[i],aux_m);
         }
         if(!(o[i]->get_moves().empty())) is_checkmate = false;
       }
-      if(is_checkmate) return current->get_color()? 'W':'B'; 
+      if(is_checkmate){
+        std::string bo = current->get_color()? "White":"Black";
+        std::cout << bo << " Pieces win" << std::endl;
+        return current->get_color()? 'W':'B';
+      }
     }
     //If there is not check
     else{
@@ -253,13 +257,10 @@ char Game::start_game(){
         }
         if(!(o[i]->get_moves().empty())) is_draw = false;
       }
-      if(is_draw || (counter_irrelevant_moves==50)) return 'D';
-    }
-    //After the validations, the move is executed
-    move_piece(moving_piece, n_p);
-    //Update the moves for the next player
-    for(size_t i=0; i<o.size(); i++){
-      o[i]->possible_moves(b_game);
+      if(is_draw || (counter_irrelevant_moves==50)){
+        std::cout << "The game finish in draw" << std::endl;
+        return 'D';
+      }
     }
     //Change turn
     turn = !turn;

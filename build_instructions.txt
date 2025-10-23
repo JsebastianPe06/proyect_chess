@@ -1,10 +1,42 @@
 # build_instructions.txt
-To build the project, simply run:
 
+##  Build Instructions
+
+### 1. Open the MSYS2 Terminal
+Make sure you open the **MSYS2 UCRT64** terminal, not MSYS or MINGW32.  
+You can verify this by running:
+echo $MSYSTEM
+It should display:
+UCRT64
+
+---
+
+### 2. Build the Project
+To compile the entire project, simply run:
 mingw32-make
-
-# or, if you have make installed as 'make':
+Or, if your system recognizes the command as 'make', you can use:
 make
 
-# The executable file will be generated as:
+---
+
+### 3. Output
+After successful compilation, the executable will be generated as:
 ./main.exe
+If you are using a custom Makefile, the output file may have a different name, such as:
+./proyecto-ajedrez.exe
+
+---
+
+### 4. Run the Executable
+You can execute the compiled program with:
+./main.exe
+or (depending on the output file name):
+./proyecto-ajedrez.exe
+
+---
+
+### 5. Notes
+- Ensure all `.cpp` and `.h` files are located in the correct `src/` and `include/` folders as expected by the Makefile.  
+- You must have **g++** installed in the UCRT64 environment. If not, install it using:
+  pacman -S mingw-w64-ucrt-x86_64-gcc
+

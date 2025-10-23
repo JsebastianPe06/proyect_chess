@@ -3,8 +3,7 @@
 #include <vector>
 #include <list>
 #include <queue>
-#include <cstdlib>
-#include <ctime>
+#include <random>
 
 #include "game.h"
 #include "player.h"
@@ -15,6 +14,9 @@ Player::Player(std::string name, bool is_white){
   this-> name = name;
   this-> is_white = is_white;
 };
+
+Player::~Player() = default;
+
 
 std::vector<Piece*>& Player::get_pieces(){
   return pieces;
@@ -53,79 +55,162 @@ void Player::start_pieces(Board& b){
 RealUser::RealUser(std::string name, bool is_white)
   :Player(name, is_white){}
 
-void RealUser::paw_promotion(Piece* p) {
-  // This method can be later adapted to a GUI popup
-  ;
-}
-
-std::array<std::pair<int,int>,2> RealUser::play_turn(const Board& board, const std::vector<Piece*>& pieces) {
-  std::cout << "\nCurrent Board:\n";
-  std::cout << board << "\n";
-  // Show pieces with possible moves
-  std::cout << "Your pieces with possible moves:\n";
-  int idx = 1;
-  std::vector<std::pair<int,int>> piece_positions;
-  for (auto* p : pieces) {
-    if (!p->get_moves().empty()) {
-      std::cout << idx << ". " << p->get_name() << " at (" << p->get_row() << "," << p->get_column() << ")\n";
-      piece_positions.push_back(p->get_actual_pos());
-      idx++;
+void RealUser::paw_promotion(Piece* p, Board& b){
+  /*When a pawn reaches its maximum rank, it chooses which piece to bring to
+  the board for the pawn*/
+  int option;
+  if(p->get_name() != "Pawn") return;
+  while(true){
+    std::cout << "================================\n" << std::endl;
+    std::cout << "           Promotion               \n" << std::endl;
+    std::cout << "================================\n" << std::endl;
+    std::cout << "\n" << std::endl;
+    std::cout << "1. In Queen\n" << std::endl;
+    std::cout << "2. In Bishop\n" << std::endl;
+    std::cout << "3. In Rook\n" << std::endl;
+    std::cout << "4. In knight\n" << std::endl;
+    std::cout << "Enter an option (1-4): ";
+    std::cin >> option;
+    if(option<1 || option>4){
+      std::cout << "Error. Value out of range\n" << std::endl;
     }
+    else break;
   }
-  int choice;
-  std::cout << "Select a piece to move by number: ";
-  std::cin >> choice;
-  if(choice < 1 || choice > (int)piece_positions.size()) 
-    return {std::pair<int,int>{-1,-1}, std::pair<int,int>{-1,-1} };
-  std::pair<int,int> from = piece_positions[choice-1];
-  //Show possible moves for the selected piece
-  Piece* selected_piece = nullptr;
-  for(auto* p : pieces) {
-    if(p->get_actual_pos() == from){
-      selected_piece = p;
+  bool color = p->get_color();
+  int row = p->get_row();
+  int col = p->get_column();
+  Piece* new_p = nullptr;
+  switch(option){
+    case 1:
+      new_p = new Queen(color, row, col);
+      break;
+    case 2:
+      new_p = new Bishop(color, row, col);
+      break;
+    case 3:
+      new_p = new Rook(color, row, col);
+      break;
+    case 4:
+      new_p = new Knight(color, row, col);
+      break;
+  }
+  auto& board = b.get_board();
+  delete board[row][col];
+  board[row][col] = new_p;
+  for (size_t i = 0; i<pieces.size(); ++i){
+    if(pieces[i]==p){
+      pieces[i] = new_p;   
       break;
     }
   }
-  std::cout << "Possible moves:\n";
-  idx = 1;
-  for(auto mv : selected_piece->get_moves()){
-    std::cout << idx << ". (" << mv.first << "," << mv.second << ")\n";
-    idx++;
+};
+
+std::array<std::pair<int,int>,2> RealUser::play_turn(const Board& board){
+  while(true){
+    /*The user chooses a piece and a move*/
+    std::cout << "\nCurrent Board:\n" << std::endl;
+    std::cout << board << "\n" << std::endl;
+    // Show pieces with possible moves
+    int choice = 0;
+    int mov = 0;
+    bool val_move = false;
+    int max = pieces.size();
+    std::string colr = get_color()? "White":"Black";
+    while(true){
+      std::cout << "Your pieces " << colr <<" with moves:\n" << std::endl;
+      for(int i=0; i<max; i++){
+        int aux_f = pieces[i]->get_row();
+        int aux_c = pieces[i]->get_column();
+        std::cout << "[" << i+1 << "]" << pieces[i]->get_name() << "(" << aux_f << "," << aux_c << ")" << std::endl;
+      }
+      //cooses piece
+      std::cout << "Select a piece to move by number: ";
+      std::cin >> choice;
+      if(choice>0 && choice<=max){
+        if(pieces[choice-1]->get_moves().empty()){
+          std::cout << "This piece has no possible moves\n" << std::endl;
+        }
+        else{
+          Piece* p = pieces[choice-1];
+          std::vector<std::pair<int, int>> moves_p = p->get_moves(); 
+          int max_mo = moves_p.size();
+          while(true){
+            for(int i=0; i<max_mo; i++){
+              int aux_pf = moves_p[i].first;
+              int aux_pc = moves_p[i].second;
+              std::cout << "[" << i+1 << "]" << "(" << aux_pf << "," << aux_pc << ")" << std::endl;
+            }
+            //choses move
+            std::cout << "Select a move to use by number (0 to exit): ";
+            std::cin >> mov;
+            if(mov==0) break;
+            if(mov<0 || mov>max_mo){
+              std::cout << "Error. Value out of range\n" << std::endl;
+            }
+            else{
+              return {{p->get_actual_pos(),moves_p[mov-1]}};
+            }
+          } 
+        }
+      }
+      else{
+          std::cout << "Error. Value out of range\n" << std::endl;
+      }
+    }
   }
-  std::cout << "Select destination by number: ";
-  int move_choice;
-  std::cin >> move_choice;
-  if(move_choice < 1 || move_choice > (int)selected_piece->get_moves().size())
-    return {std::pair<int,int>{-1,-1}, std::pair<int,int>{-1,-1}};
-  std::pair<int,int> to = selected_piece->get_moves()[move_choice-1];
-  return {from, to};
-}
+};
+
 
 //---------------------------- RandomBot ------------------------------
 
 RandomBot::RandomBot(bool is_white)
-  : Player("Bot", is_white) {
-  std::srand(std::time(nullptr));
+  :Player("RandomBot", is_white), gen(std::random_device{}()){
+};
+
+int RandomBot::random_int(int a, int b) {
+    std::uniform_int_distribution<int> dist(a, b);
+    return dist(gen);
 }
 
-void RandomBot::paw_promotion(Piece* p) {
-  // Auto promote to queen
-  std::cout << "Bot pawn promoted automatically.\n";
-}
-
-std::array<std::pair<int,int>,2> play_turn(Board& board, const std::vector<Piece*>& pieces){
-  std::vector<std::pair<Piece*, std::pair<int,int>>> all_moves;
-  for (auto* p : pieces) {
-    p->possible_moves(board);
-    for (auto& m : p->get_moves())
-      all_moves.push_back({p, m});
+void RandomBot::paw_promotion(Piece* p, Board& b){
+  int cas = random_int(0, pieces.size()-1);
+  bool color = p->get_color();
+  int row = p->get_row();
+  int col = p->get_column();
+  Piece* new_p = nullptr;
+  switch(cas){
+    case 1:
+      new_p = new Queen(color, row, col);
+      break;
+    case 2:
+      new_p = new Bishop(color, row, col);
+      break;
+    case 3:
+      new_p = new Rook(color, row, col);
+      break;
+    case 4:
+      new_p = new Knight(color, row, col);
+      break;
   }
-  if (all_moves.empty())
-    return { std::make_pair(-1,-1), std::make_pair(-1,-1) };
-  int idx = std::rand() % all_moves.size();
-  return { all_moves[idx].first->get_actual_pos(), all_moves[idx].second };
+  auto& board = b.get_board();
+  delete board[row][col];
+  board[row][col] = new_p;
+  for (size_t i = 0; i<pieces.size(); ++i){
+    if(pieces[i]==p){
+      pieces[i] = new_p;   
+      break;
+    }
+  }
 }
 
-void paw_promotion(Piece* p){
-  std::cout << "Bot pawn promoted automatically to Queen.\n";
+std::array<std::pair<int, int>, 2> RandomBot::play_turn(const Board& board){
+  int pos_p = random_int(0, pieces.size()-1);
+  while(pieces[pos_p]->get_moves().size()==0){
+    pos_p = random_int(0, pieces.size()-1);
+  }
+  int pos_m = random_int(0, pieces[pos_p]->get_moves().size()-1);
+  std::pair<int, int> new_pos = pieces[pos_p]->get_moves()[pos_m];
+  std::cout << "The RandomBot has moved the piece " << pieces[pos_p]->get_name()
+  << " to (" << new_pos.first << "," << new_pos.second << ")" << std::endl;
+  return {pieces[pos_p]->get_actual_pos(), new_pos};
 };

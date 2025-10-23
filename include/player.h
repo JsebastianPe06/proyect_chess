@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <queue>
+#include <random>
 
 #include "pieces.h"
 
@@ -20,31 +21,37 @@ class Player{
   public:
     Player(std::string name, bool is_white);
 
+    virtual ~Player();
     //getters and setters  
     std::string get_name();
     bool get_color();
     std::vector<Piece*>& get_pieces();
     void start_pieces(Board& b);
 
-    virtual std::array<std::pair<int, int>, 2> play_turn(const Board& board, const std::vector<Piece*>& pieces) = 0;
-    virtual void paw_promotion(Piece* p) = 0;
+    virtual std::array<std::pair<int, int>, 2> play_turn(const Board& board) = 0;
+    virtual void paw_promotion(Piece* p, Board& b) = 0;
 };
 
 class RealUser: public Player{
   public:
     RealUser(std::string name, bool is_white);
 
-    std::array<std::pair<int, int>, 2> play_turn(const Board& board, const std::vector<Piece*>& pieces) override;
-    virtual void paw_promotion(Piece* p) override;
+    std::array<std::pair<int, int>, 2> play_turn(const Board& board) override;
+    void paw_promotion(Piece* p, Board& b) override;
 
 };
 
 class RandomBot: public Player{
+  private:
+    std::mt19937 gen;
+  
   public:
     RandomBot(bool is_white);
 
-    std::array<std::pair<int, int>, 2> play_turn(const Board& board, const std::vector<Piece*>& pieces) override;
-    virtual void paw_promotion(Piece* p) override;
+    int random_int(int a, int b);
+
+    std::array<std::pair<int, int>, 2> play_turn(const Board& board) override;
+    void paw_promotion(Piece* p, Board& b) override;
 };
 
 #endif

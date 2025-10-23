@@ -31,7 +31,7 @@ void Interface::defined_game(){
     }
     else if(option==2){
       bool start;
-      std::cout << "Start RandomBot?: ";
+      std::cout << "Start RandomBot(1 yes: 0:no)?: ";
       std::cin >> start;
       if(start){
         Player* p1 = new RandomBot(1);
